@@ -60,9 +60,9 @@ def clear_db():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("DROP TABLE IF EXISTS LOCATIONS")
                 cur.execute("DROP TABLE IF EXISTS MAPS")
                 cur.execute("DROP TABLE IF EXISTS LOCATION_DETAILS")
+                cur.execute("DROP TABLE IF EXISTS LOCATIONS")
                 conn.commit()
         create_log("DB", "Database cleared successfully.")
     except Exception as e:
@@ -105,7 +105,7 @@ def create_maps():
                 cur.execute(
                     """
                     CREATE TABLE IF NOT EXISTS MAPS (
-                        id INT PRIMARY KEY,
+                        id INT AUTO_INCREMENT PRIMARY KEY,
                         location_id INT,
                         map_iframe TEXT,
                         latitude FLOAT,
@@ -149,45 +149,54 @@ def create_location_details():
 
 # Fn to insert data into Locations table:
 def insert_location(id, name, location, image, image2, image3, image4):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO LOCATIONS (id, name, location, image, image2, image3, image4)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """,
-                (id, name, location, image, image2, image3, image4)
-            )
-            conn.commit()
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO LOCATIONS (id, name, location, image, image2, image3, image4)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (id, name, location, image, image2, image3, image4)
+                )
+                conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error inserting location data: {e}")
 
 
 # Fn to insert data into Maps table:
 def insert_map(location_id, map_iframe, latitude, longitude):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO MAPS (location_id, map_iframe, latitude, longitude)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (location_id, map_iframe, latitude, longitude)
-            )
-            conn.commit()
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO MAPS (location_id, map_iframe, latitude, longitude)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (location_id, map_iframe, latitude, longitude)
+                )
+                conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error inserting map data: {e}")
 
 
 # Fn to insert data into Location Details table:
 def insert_location_details(location_id, description_intro, description_history, description_highlights, description_tips):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO LOCATION_DETAILS (location_id, description_intro, description_history, description_highlights, description_tips)
-                VALUES (%s, %s, %s, %s, %s)
-                """,
-                (location_id, description_intro, description_history,
-                 description_highlights, description_tips)
-            )
-            conn.commit()
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO LOCATION_DETAILS (location_id, description_intro, description_history, description_highlights, description_tips)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (location_id, description_intro, description_history,
+                     description_highlights, description_tips)
+                )
+                conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error inserting location details: {e}")
 
 
 # -------------------------------------------------------------------------------------
