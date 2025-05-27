@@ -1,11 +1,28 @@
 from sq_db import *
 from pprint import pprint
+from dotenv import load_dotenv
+
 
 # ----------------------------------------------------------------------------------------------
 # Initializations Section:
 # ----------------------------------------------------------------------------------------------
 
+load_dotenv()
+DB_MODE = os.environ.get("DB_MODE")
+
+if DB_MODE == 'local':
+    print('Using Local MySQL Database')
+
+elif DB_MODE == 'remote':
+    print('Using Remote MySQL Database')
+
+else:
+    print('DB_MODE not set correctly in .env file.')
+    exit(1)
+print()
+
 # Clear entire database:
+print("Clearing database...")
 clear_db()
 
 # Create tables:
