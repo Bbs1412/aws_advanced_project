@@ -1,2 +1,4 @@
 flask
 pprintpp
+python-dotenv
+pymysql
