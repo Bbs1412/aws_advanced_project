@@ -60,6 +60,8 @@ def clear_db():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
+                cur.execute("DROP TABLE IF EXISTS COUNTRIES")
+                cur.execute("DROP TABLE IF EXISTS LANGUAGES")
                 cur.execute("DROP TABLE IF EXISTS MAPS")
                 cur.execute("DROP TABLE IF EXISTS LOCATION_DETAILS")
                 cur.execute("DROP TABLE IF EXISTS LOCATIONS")
@@ -84,6 +86,7 @@ def create_locations():
                         id INT PRIMARY KEY,
                         name TEXT,
                         location TEXT,
+                        country_code TEXT,
                         image TEXT,
                         image2 TEXT,
                         image3 TEXT,
@@ -143,21 +146,62 @@ def create_location_details():
         create_log("DB", f"Error creating table LOCATION_DETAILS: {e}")
 
 
-# -------------------------------------------------------------------------------------
-# Data Operations:
-# -------------------------------------------------------------------------------------
-
-# Fn to insert data into Locations table:
-def insert_location(id, name, location, image, image2, image3, image4):
+# Languages table to hold the languages supported:
+def create_languages():
+    create_log("DB", "Creating the table LANGUAGES.")
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO LOCATIONS (id, name, location, image, image2, image3, image4)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    CREATE TABLE IF NOT EXISTS LANGUAGES (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name TEXT,
+                        code TEXT
+                    )
+                    """
+                )
+            conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error creating table LANGUAGES: {e}")
+
+
+# Countries table to hold the countries supported:
+def create_countries():
+    create_log("DB", "Creating the table COUNTRIES.")
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS COUNTRIES (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name TEXT,
+                        code TEXT,
+                        flag TEXT
+                    )
+                    """
+                )
+            conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error creating table COUNTRIES: {e}")
+
+
+# -------------------------------------------------------------------------------------
+# Data Operations:
+# -------------------------------------------------------------------------------------
+
+# Fn to insert data into Locations table:
+def insert_location(id, name, location, country_code, image, image2, image3, image4):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO LOCATIONS (id, name, location, country_code, image, image2, image3, image4)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """,
-                    (id, name, location, image, image2, image3, image4)
+                    (id, name, location, country_code, image, image2, image3, image4)
                 )
                 conn.commit()
     except Exception as e:
@@ -191,12 +235,45 @@ def insert_location_details(location_id, description_intro, description_history,
                     INSERT INTO LOCATION_DETAILS (location_id, description_intro, description_history, description_highlights, description_tips)
                     VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (location_id, description_intro, description_history,
-                     description_highlights, description_tips)
+                    (location_id, description_intro, description_history, description_highlights, description_tips)
                 )
                 conn.commit()
     except Exception as e:
         create_log("DB", f"Error inserting location details: {e}")
+
+
+# Fn to insert data into Languages table:
+def insert_language(name, code):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO LANGUAGES (name, code)
+                    VALUES (%s, %s)
+                    """,
+                    (name, code)
+                )
+                conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error inserting language data: {e}")
+
+
+# Fn to insert data into Countries table:
+def insert_country(name, code, flag):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO COUNTRIES (name, code, flag)
+                    VALUES (%s, %s, %s)
+                    """,
+                    (name, code, flag)
+                )
+                conn.commit()
+    except Exception as e:
+        create_log("DB", f"Error inserting country data: {e}")
 
 
 # -------------------------------------------------------------------------------------
@@ -216,8 +293,52 @@ def get_iframe_code(src, width=350, height=300):
 # Functions to call from server:
 # -------------------------------------------------------------------------------------
 
+# Get all locations: (meant to be called from the client side js)
+def get_all_locations_data(country_code='IN'):
+    country_code = country_code.upper()
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            if country_code == "ALL":
+                cur.execute("SELECT * FROM LOCATIONS")
+            else:
+                cur.execute("SELECT * FROM LOCATIONS WHERE country_code = %s", (country_code,))
+            locations = cur.fetchall()
+            headers = [desc[0] for desc in cur.description]
+
+    locations_list = [dict(zip(headers, row)) for row in locations]
+    # create_log("DB", f"Fetched {len(locations_list)} locations from the database for country code '{country_code}'.")
+    return locations_list
+
+
+# Get all languages supported:
+def get_all_languages():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT name, code FROM LANGUAGES")
+            languages = cur.fetchall()
+            headers = [desc[0] for desc in cur.description]
+
+    languages_list = [dict(zip(headers, row)) for row in languages]
+    # create_log("DB", f"Fetched {len(languages_list)} languages from the database.")
+    return languages_list
+
+
+# Get all countries supported:
+def get_all_countries():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT name, code, flag FROM COUNTRIES")
+            countries = cur.fetchall()
+            headers = [desc[0] for desc in cur.description]
+
+    countries_list = [dict(zip(headers, row)) for row in countries]
+    # create_log("DB", f"Fetched {len(countries_list)} countries from the database.")
+    return countries_list
+
+
 # Fn to call from server which returns location based on id (for specific location page):
-def get_location_data(id, output_format='json'):
+def get_location_data(id):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -230,40 +351,12 @@ def get_location_data(id, output_format='json'):
             headers = [desc[0] for desc in cur.description]
 
     resp = dict(zip(headers, location)) if location else {}
-    return json.dumps(resp, indent=5) if output_format == 'json' else resp
-
-
-# Get map data of location based on location_id:
-def get_map_data(location_id, output_format='json'):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT * FROM MAPS WHERE location_id = %s
-                """,
-                (location_id,)
-            )
-            location_map = cur.fetchone()
-            headers = [desc[0] for desc in cur.description]
-
-    resp = dict(zip(headers, location_map)) if location_map else {}
-    return json.dumps(resp, indent=5) if output_format == 'json' else resp
-
-
-# Get all locations: (meant to be called from the client side js)
-def get_all_locations_data(output_format='json'):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM LOCATIONS")
-            locations = cur.fetchall()
-            headers = [desc[0] for desc in cur.description]
-
-    locations_list = [dict(zip(headers, row)) for row in locations]
-    return json.dumps(locations_list, indent=5) if output_format == 'json' else locations_list
+    # create_log("DB", f"Fetched location data for id {id}.")
+    return resp
 
 
 # Get location details (text data) to render the page for a specific location:
-def get_place_details(place_id, output_format='json'):
+def get_place_details(place_id):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -278,4 +371,44 @@ def get_place_details(place_id, output_format='json'):
             headers = [desc[0] for desc in cur.description]
 
     resp = dict(zip(headers, location_details)) if location_details else {}
-    return json.dumps(resp, indent=5) if output_format == 'json' else resp
+    # create_log("DB", f"Fetched place details for place_id {place_id}.")
+    return resp
+
+
+# Get map data of location based on location_id:
+def get_map_data(location_id):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT * FROM MAPS WHERE location_id = %s
+                """,
+                (location_id,)
+            )
+            location_map = cur.fetchone()
+            headers = [desc[0] for desc in cur.description]
+
+    resp = dict(zip(headers, location_map)) if location_map else {}
+    # create_log("DB", f"Fetched map data for location_id {location_id}.")
+    return resp
+
+
+# ---------------------------------------------------------------------------------------
+# Testing Zone:
+# ---------------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    from pprint import pprint
+    print("\n\n\n All Locations Data:\n")
+    pprint(get_all_locations_data(country_code='ALL'))
+    print("\n\n\n All Languages:\n")
+    pprint(get_all_languages())
+    print("\n\n\n All Countries:\n")
+    pprint(get_all_countries())
+
+    print("\n\n\n Location Data for ID 2:\n")
+    pprint(get_location_data(2))
+    print("\n\n\n Place Details for Place ID 2:\n")
+    pprint(get_place_details(2))
+    print("\n\n\n Map Data for Location ID 2:\n")
+    pprint(get_map_data(2))
