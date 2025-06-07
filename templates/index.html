@@ -15,6 +15,19 @@
     <header>
         <nav>
             <div class="logo">Incredible India</div>
+
+            <div class="country-selector">
+                <div class="select-wrapper">
+                    <input type="text" id="country_search" placeholder="Search country..." class="country-search">
+
+                    <div id="country_dropdown" class="country-dropdown-content">
+                        <!-- Countries will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side with nav-links and language -->
+            <div class="nav-right">
             <div class="nav-links">
                 <a href="#" class="active">Home</a>
                 <a href="#">About</a>
@@ -24,7 +37,10 @@
     </header>
 
     <main>
-        <h1>Discover India's Most Beautiful Places</h1>
+        <h1 id="title_main">
+            Discover Most Beautiful Places of India 🇮🇳
+            <!-- This title with the country name will be rendered dynamically -->
+        </h1>
         <div class="places-grid" id="placesContainer">
             <!-- Places will be dynamically loaded here -->
         </div>
