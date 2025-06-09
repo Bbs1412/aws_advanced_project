@@ -1,19 +1,15 @@
-# This complete logger can be easily replaced by importing the logger module
-# Implemented this only to try building a basic logger from scratch
-
 import os
+import pytz
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-LOGGING_ENABLED = True if os.environ.get(
-    "LOGGING", "false").lower() == 'true' else False
+LOGGING_ENABLED = True if os.environ.get("LOGGING", "").lower() == 'true' else False
 
 
 def get_timestamp():
-    return datetime.now().strftime("%d-%m-%y %H:%M:%S")
     # return datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-    # return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(pytz.timezone('Asia/Kolkata')).strftime("%d-%m-%y %H:%M:%S")
 
 # print(get_timestamp())
 
@@ -34,4 +30,5 @@ def create_log(source: str, message: object, pre_lines=0, post_lines=0):
         f.write(log + '\n')
 
 
-# create_log("app", "Server is live")
+if __name__ == "__main__":
+    create_log("app", "Server is live")
