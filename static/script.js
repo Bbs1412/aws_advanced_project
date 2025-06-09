@@ -6,6 +6,7 @@ let currentCountryCode = "IN"; // Default to India (used for initial load)
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeS3BaseUrl();
+    initializeLanguages();
     initializeCountries();
     initializePlaces(currentCountryCode);
 
@@ -16,14 +17,38 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize S3 Base URL
 // ----------------------------------------------------------------------------------
 function initializeS3BaseUrl() {
-fetch('/get_s3_base_url')
-    .then(response => response.json())
-    .then(data => {
-        S3_BASE_URL = data;
+    fetch('/get_s3_base_url')
+        .then(response => response.json())
+        .then(data => {
+            S3_BASE_URL = data;
         })
         .catch(error => console.error('Error fetching S3 base URL:', error));
 }
 
+// ----------------------------------------------------------------------------------
+// Initialize Languages
+// ----------------------------------------------------------------------------------
+function initializeLanguages() {
+    fetch('/get_languages')
+        .then(response => response.json())
+        .then(data => {
+            renderLanguageDropdown(data);
+        })
+        .catch(error => console.error('Error fetching languages:', error));
+}
+
+// Render language dropdown
+function renderLanguageDropdown(languages) {
+    const select = document.getElementById('language_select');
+    select.innerHTML = '';
+
+    languages.forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang.code;
+        option.textContent = lang.name;
+        select.appendChild(option);
+    });
+}
 
 // ----------------------------------------------------------------------------------
 // Change country name in the header:
@@ -136,33 +161,33 @@ function initializePlaces(countryCode) {
 }
 
 // Create a place card
-    function createPlaceCard(loc) {
-        const card = document.createElement('div');
-        card.className = 'place-card';
-        card.innerHTML = `
+function createPlaceCard(loc) {
+    const card = document.createElement('div');
+    card.className = 'place-card';
+    card.innerHTML = `
         <!-- Using Flask 
-            -->
-            <img src="/get_img/${loc.image}" alt="${loc.name}" class="place-image">
+        -->
+        <img src="/get_img/${loc.image}" alt="${loc.name}" class="place-image">
         <img src="/get_img/${loc.image}" alt="${loc.name}" class="place-bg-image">
-            
-            <!-- Using S3
-            <img src="${S3_BASE_URL}/${loc.image}" alt="${loc.name}" class="place-image">
-        <img src="${S3_BASE_URL}/${loc.image}" alt="${loc.name}" class="place-bg-image">
-            -->
 
-            <div class="place-info">
-                <h2>${loc.name}</h2>
-                <p>${loc.location}</p>
-            </div>
-        `;
+        <!-- Using S3 
+        <img src="${S3_BASE_URL}/${loc.image}" alt="${loc.name}" class="place-image">
+        <img src="${S3_BASE_URL}/${loc.image}" alt="${loc.name}" class="place-bg-image">
+        -->
+
+        <div class="place-info">
+            <h2>${loc.name}</h2>
+            <p>${loc.location}</p>
+        </div>
+    `;
 
     // Add click event for place details
-        card.addEventListener('click', () => {
-            window.location.href = `/place/${loc.id}`;
-        });
+    card.addEventListener('click', () => {
+        window.location.href = `/place/${loc.id}`;
+    });
 
-        return card;
-    }
+    return card;
+}
 
 // ----------------------------------------------------------------------------------
 // Event Listeners

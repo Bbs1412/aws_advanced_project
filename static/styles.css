@@ -2,7 +2,6 @@
 /*                                      Global Styles                                         */
 /* ------------------------------------------------------------------------------------------ */
 
-
 :root {
     --bg-primary: #121212;
     --bg-secondary: #1e1e1e;
@@ -26,6 +25,10 @@ body {
     padding-bottom: 4rem;
 }
 
+/* ------------------------------------------------------------------------------------------ */
+/*                                      Header & Navigation                                   */
+/* ------------------------------------------------------------------------------------------ */
+
 header {
     background-color: var(--bg-secondary);
     padding: 1rem 2rem;
@@ -41,12 +44,28 @@ nav {
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
+    gap: 1rem;
+    position: relative;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--accent);
+    z-index: 102;
+    min-width: 200px; /* Ensures consistent spacing */
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    min-width: 200px; /* Ensures consistent spacing */
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
 }
 
 .nav-links a {
@@ -61,6 +80,139 @@ nav {
     color: var(--accent);
 }
 
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    cursor: pointer;
+    z-index: 102;
+}
+
+.hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px;
+    background-color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+/* Language Selector */
+.lang-selector {
+    position: relative;
+    margin-left: 1rem;
+}
+
+.language-dropdown {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.language-dropdown:hover {
+    background-color: var(--card-hover);
+}
+
+.language-dropdown:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(247, 139, 24, 0.2);
+}
+
+.lang-selector::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: var(--accent);
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Country Selector */
+.country-selector {
+    position: relative;
+    width: 300px; /* Fixed width for desktop */
+    margin: 0 1rem;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.country-search {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.country-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(247, 139, 24, 0.2);
+}
+
+.country-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--accent);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    z-index: 1000;
+}
+
+.country-dropdown-content.show {
+    display: block;
+}
+
+.country-option {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.country-option:hover {
+    background-color: var(--card-hover);
+    color: var(--accent);
+}
+
+/* Scrollbar Styling */
+.country-dropdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.country-dropdown-content::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.country-dropdown-content::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/*                                      Main Content                                          */
+/* ------------------------------------------------------------------------------------------ */
+
 main {
     max-width: 1200px;
     margin: 2rem auto;
@@ -72,11 +224,6 @@ h1 {
     margin-bottom: 3rem;
     color: var(--text-primary);
 }
-
-/* ------------------------------------------------------------------------------------------ */
-/*                                               Main Page                                    */
-/* ------------------------------------------------------------------------------------------ */
-
 
 .places-grid {
     display: grid;
@@ -90,7 +237,6 @@ h1 {
     overflow: hidden;
     transition: transform 0.3s ease;
     cursor: pointer;
-    
     position: relative;
     width: 100%;
 }
@@ -122,7 +268,6 @@ h1 {
     transform: scale(1.25);
 }
 
-
 .place-info {
     padding: 1.5rem;
     background-color: var(--bg-secondary);
@@ -140,11 +285,9 @@ h1 {
     font-size: 0.9rem;
 }
 
-
 /* ------------------------------------------------------------------------------------------ */
-/*                                               Footer Code                                  */
+/*                                      Footer                                                */
 /* ------------------------------------------------------------------------------------------ */
-
 
 footer {
     background-color: var(--bg-secondary);
@@ -157,20 +300,78 @@ footer {
     z-index: 100;
 }
 
+/* ------------------------------------------------------------------------------------------ */
+/*                                      Media Queries                                         */
+/* ------------------------------------------------------------------------------------------ */
+
 @media (max-width: 768px) {
     nav {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .logo {
+        flex: 1;
+    }
+
+    .hamburger {
+        display: block;
+        margin-left: 1rem;
+    }
+
+    .country-selector {
+        order: 3;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .nav-right {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 60%;
+        background: var(--bg-secondary);
         flex-direction: column;
-        text-align: center;
+        justify-content: flex-start;
+        padding: 5rem 2rem;
+        transition: 0.3s ease;
+        z-index: 101;
+    }
+
+    .nav-right.active {
+        right: 0;
     }
 
     .nav-links {
-        margin-top: 1rem;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
 
     .nav-links a {
-        margin: 0 1rem;
+        margin: 1rem 0;
+        font-size: 1.2rem;
     }
 
+    .lang-selector {
+        margin: 1rem 0;
+    }
+
+    /* Hamburger Animation */
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    /* Main Content Adjustments */
     main {
         margin: 1rem auto;
     }
