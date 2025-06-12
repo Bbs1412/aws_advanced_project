@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Places Information</title>
+    <style>
+        .place {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #language-select {
+            margin: 20px;
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Places Information</h1>
+    <select id="language-select">
+        <option value="en">English</option>
+        <option value="de">German</option>
+        <option value="fr">French</option>
+    </select>
+
+    <div id="places-container">
+        {% for place in places %}
+        <div class="place">
+            <h2>{{ place["name"] }}</h2>
+            <p>{{ place["description"] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const lang_selector = document.getElementById("language-select");
+
+        lang_selector.addEventListener("change", function () {
+            const selected_language = lang_selector.value;
+            fetch(`/test_translate?lang=${selected_language}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    const placesContainer = document.getElementById("places-container");
+                    placesContainer.innerHTML = "";
+                    data.places.forEach((place) => {
+                        const placeDiv = document.createElement("div");
+                        placeDiv.className = "place";
+                        placeDiv.innerHTML = `<div><h2>${place.name}</h2><p>${place.description}</p></div>`;
+                        placesContainer.appendChild(placeDiv);
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>
