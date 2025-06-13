@@ -10,16 +10,53 @@
 </head>
 
 <body>
+
     <header>
         <nav>
             <div class="logo">Incredible India</div>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="#">About</a>
-                <a href="#">Contact</a>
+
+            <!-- No country selector in checking some particular place
+            <div class="country-selector">
+                <div class="select-wrapper">
+                    <input type="text" id="country_search" placeholder="Search country..." class="country-search">
+                    <div id="country_dropdown" class="country-dropdown-content">
+                        < !-- Countries will be added here dynamically -- >
+                    </div>
+                </div>
+            </div> 
+            -->
+
+            <!-- Right side with nav-links and language -->
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="#" class="active">Home</a>
+                    <a href="#">About</a>
+                    <a href="#">Contact</a>
+                </div>
+
+                <div class="lang-selector">
+                    <select id="language_select" class="language-dropdown">
+                        <option value="en">English</option>
+                        <!-- 
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="gu">ગુજરાતી</option>
+                        <option value="mr">मराठी</option>
+                        -->
+                    </select>
+                </div>
             </div>
+
+            <!-- Hamburger menu -->
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
         </nav>
     </header>
+
 
     <main class="place-detail">
         <div class="hero-section">
@@ -30,6 +67,7 @@
             <!-- From S3 bucket
             <img src="{{ place.s3_base_url }}/{{ place.image }}" alt="{{ place.name }}" class="main-image">
             -->
+
 
             <div class="place-header">
                 <h1>{{ place.name }}</h1>
@@ -45,12 +83,12 @@
                 </div>
 
                 <div class="image-gallery">
-                    <!-- Flask server
+                    <!-- Flask server 
                     -->
                     <img src="/get_img/{{ place.image2 }}" alt="{{ place.name }}">
                     <img src="/get_img/{{ place.image3 }}" alt="{{ place.name }}">
 
-                    <!-- S3 Bucket
+                    <!-- S3 Bucket 
                     <img src="{{ place.s3_base_url }}/{{ place.image2 }}" alt="{{ place.name }}">
                     <img src="{{ place.s3_base_url }}/{{ place.image3 }}" alt="{{ place.name }}">
                     -->
@@ -95,8 +133,7 @@
         <p>&copy; 2025 Incredible India. All rights reserved.</p>
     </footer>
 
-    <!-- Script can be added like this, but it is un_used -->
-    <!-- <script src="{{ url_for('static', filename='detail_script.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='detail_script.js') }}"></script>
 </body>
 
 </html>
