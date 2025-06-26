@@ -176,3 +176,5 @@ z_*
 .vscode/
 logs*
 lite.db
+ToDo*
+.env
