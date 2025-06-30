@@ -3,8 +3,12 @@ import json
 import boto3
 from pprint import pprint
 from logger import create_log
-from dotenv import load_dotenv
-from flask import Flask, render_template, jsonify, send_from_directory, abort, request
+
+from flask import (
+    Flask, jsonify, abort, request,  redirect, url_for,
+    render_template, send_from_directory,
+    flash, session as flask_session
+)
 
 from database_ops import (
     get_all_locations_data,
@@ -15,13 +19,46 @@ from database_ops import (
     get_place_details,
 )
 
+from dotenv import load_dotenv
 load_dotenv()
-LOGGING_ENABLED = True if os.environ.get("LOGGING", "false").lower() == 'true' else False
+
+# ----------------------------------------------------------------------------------------------
+# Flask App Setup
+# ----------------------------------------------------------------------------------------------
+
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE="None")
 
 IMAGE_DIRECTORY = os.environ.get("IMAGE_DIRECTORY", "images")
 S3_BASE_URL = os.environ.get("S3_BASE_URL")
+AUTH_ENABLED = os.environ.get("AUTHENTICATE_USERS", "false").lower() == 'true'
 
+
+# ----------------------------------------------------------------------------------------------
+# Setup for AWS Services
+# ----------------------------------------------------------------------------------------------
+
+aws_session = boto3.Session(
+    aws_access_key_id=os.environ.get("IAM_AWS_ACCESS_KEY"),
+    aws_secret_access_key=os.environ.get("IAM_AWS_SECRET_KEY"),
+    region_name=os.environ.get("IAM_AWS_REGION"),
+)
+
+cognito = aws_session.client(
+    service_name="cognito-idp",
+    region_name=os.environ.get("COG_APP_REGION", "us-east-1")
+)
+
+sns = aws_session.client(
+    service_name="sns",
+    region_name=os.environ.get("SNS_REGION", "us-east-1")
+)
+
+
+# ----------------------------------------------------------------------------------------------
+# Test Endpoints:
+# ----------------------------------------------------------------------------------------------
 
 @app.route('/test')
 def index():
@@ -29,12 +66,165 @@ def index():
     return jsonify("server is live"), 200
 
 
-# Main page of the website, render login page, if authenticated, render the main page:
-# use the parameter "auth" to check if the user is authenticated
+# ----------------------------------------------------------------------------------------------
+# User Authentication Endpoints
+# ----------------------------------------------------------------------------------------------
+
+# Routes for login using email:
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        create_log("App", f"{request.remote_addr} visited the login page.")
+        return render_template("auth_login.html")
+
+    try:
+        if not AUTH_ENABLED:
+            flash("Authentication is disabled.", "info")
+            return redirect(url_for("main"))
+
+        data = request.form
+        email = data["email"]
+        password = data["password"]
+
+        create_log("App", f"{request.remote_addr} tried to login with email: {email}.")
+
+        # Authenticate user with Cognito
+        # If invalid credentials, Cognito will throw an `exception`
+        response = cognito.initiate_auth(
+            ClientId=os.environ.get("COG_APP_CLIENT_ID"),
+            AuthFlow="USER_PASSWORD_AUTH",
+            AuthParameters={"USERNAME": email, "PASSWORD": password},
+        )
+
+        # pprint(response)
+
+        # Mark the user as logged in
+        flask_session['logged_in'] = True
+        flask_session['user_email'] = email
+
+        # Send login notification
+        sns.publish(
+            TopicArn=os.environ.get("SNS_TOPIC_ARN"),
+            Message=f"User {email} has logged in successfully",
+            Subject="New User Login",
+        )
+
+        flash("Login successful!", "success")
+
+        # Redirect to the last visited page or index
+        next_page = flask_session.pop('next', '/')
+        return redirect(next_page)
+
+    except Exception as e:
+        create_log("App", f"{request.remote_addr} failed to login with email: {email}.")
+        # flash("Login failed. Please try again.", category='success')
+        flash(str(e), "error")
+        return render_template("auth_login.html")
+
+
+# Routes for signup using email:
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "GET":
+        return render_template("auth_signup.html")
+
+    try:
+        if not AUTH_ENABLED:
+            flash("Authentication is disabled.", "info")
+            return redirect(url_for("main"))
+
+        data = request.form  # Using form data instead of JSON
+        email = data["email"]
+        password = data["password"]
+
+        # Sign up user with Cognito
+        response = cognito.sign_up(
+            ClientId=os.environ.get("COG_APP_CLIENT_ID"),
+            Username=email,
+            Password=password,
+            UserAttributes=[
+                {"Name": "email", "Value": email},
+            ],
+        )
+
+        # pprint(response)
+
+        flash("Please check your email for verification code", "success")
+        return redirect(url_for("verify", email=email))
+
+    except Exception as e:
+        flash(str(e), "error")
+        return render_template("auth_signup.html")
+
+
+# Routes for verification using email:
+@app.route("/verify", methods=["GET", "POST"])
+def verify():
+    email = request.args.get("email")
+
+    if request.method == "GET":
+        return render_template("auth_verify.html", email=email)
+
+    try:
+        if not AUTH_ENABLED:
+            flash("Authentication is disabled.", "info")
+            return redirect(url_for("main"))
+
+        data = request.form
+        code = data["code"]
+
+        # Confirm sign up with verification code
+        cognito.confirm_sign_up(
+            ClientId=os.environ.get("COG_APP_CLIENT_ID"),
+            Username=email,
+            ConfirmationCode=code
+        )
+
+        flash("Email verified successfully! Please login.", "success")
+        return redirect(url_for("login"))
+
+    except Exception as e:
+        flash(str(e), "error")
+        return render_template("auth_verify.html", email=email)
+
+
+# Routes for logout and clear the flask session:
+@app.route("/logout")
+def logout():
+    if not AUTH_ENABLED:
+        flash("Authentication is disabled.", "info")
+        return redirect(url_for("main"))
+
+    flask_session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("login"))
+
+
+# ----------------------------------------------------------------------------------------------
+# Main Application Routes
+# ----------------------------------------------------------------------------------------------
+
+# Main page of the website, if authenticated, render the main page:
 @app.route("/")
 def main():
-    create_log("App", f"{request.remote_addr} visited the main page.")
-    return render_template("index.html"), 200
+    # If authentication is enabled, check if the user is logged in
+    if AUTH_ENABLED:
+        if not flask_session.get('logged_in', False):
+            # Store the current endpoint for post-login redirection
+            flask_session['next'] = request.path
+            flash("Please log in to continue.", "warning")
+            return render_template('auth_login.html')
+
+        user = flask_session.get('user_email', 'Guest')
+        create_log("App", f"{request.remote_addr} visited the main page as user: {user}.")
+
+    else:
+        # If authentication is not enabled, render the main page directly
+        flask_session['logged_in'] = True
+        flask_session['user_email'] = "Guest"
+        user = "Guest"
+
+    return render_template("index.html", user_mail=user), 200
 
 
 # Get all locations within a country using country_code:
