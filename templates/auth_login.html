@@ -3,7 +3,7 @@
 <main>
     <div class="auth-container">
         <h1>Login</h1>
-        <form method="POST" action="{{ url_for(" login") }}" class="auth-form">
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
             <div class="form-group">
                 <input type="email" name="email" placeholder="Email" required>
             </div>
@@ -13,7 +13,7 @@
             <button type="submit" class="auth-button">Login</button>
         </form>
         <p class="auth-link">
-            Don't have an account? <a href="{{ url_for(" signup") }}">Sign Up</a>
+            Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a>
         </p>
     </div>
 </main>
