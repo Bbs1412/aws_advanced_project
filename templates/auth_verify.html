@@ -1,0 +1,14 @@
+{% extends "auth_base.html" %}
+{% block content %}
+<main>
+    <div class="auth-container">
+        <h1>Verify Email</h1>
+        <form method="POST" action="{{ url_for('verify', email=email) }}" class="auth-form">
+            <div class="form-group">
+                <input type="text" name="code" placeholder="Enter verification code" required>
+            </div>
+            <button type="submit" class="auth-button">Verify</button>
+        </form>
+    </div>
+</main>
+{% endblock %}
