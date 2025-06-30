@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Travel Assistant Chatbot</title>
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #f78b18;
+            --card-hover: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+
+            min-height: 95vh;
+            display: flex;
+            /* justify-content: center; */
+            align-items: center;
+        }
+
+        .chatbot-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatbot-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .chatbot-header h1 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .features-section {
+            background-color: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid var(--card-hover);
+        }
+
+        .features-section h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features-list li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .features-list li:before {
+            content: "•";
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .chatbot-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .features-section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <h1>Travel Buddy 👋</h1>
+            <div class="description">
+                Your personal travel guide for various countries. Ask me anything about destinations, weather, food
+                spots, hotels, and the best time to visit!
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h2>🙋‍♂️ What Can I Help You With?</h2>
+            <ul class="features-list">
+                <li>Information about tourist destinations.</li>
+                <li>Weather conditions and best times to visit</li>
+                <li>Popular food spots and local cuisine</li>
+                <li>Hotel recommendations and accommodation options</li>
+                <li>Travel tips and seasonal highlights</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (
+            function (d, m) {
+                var kommunicateSettings = {
+                    appId: "<your_app_id_here>",
+                    popupWidget: true,
+                    automaticChatOpenOnNavigation: true,
+                    backgroundColor: "#1e1e1e",
+                    color: "#f78b18",
+                };
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.async = true;
+                s.src = "https://widget.kommunicate.io/v2/kommunicate.app";
+                var h = document.getElementsByTagName("head")[0];
+                h.appendChild(s);
+                window.kommunicate = m;
+                m._globals = kommunicateSettings;
+            }
+        )(
+            document, window.kommunicate || {}
+        );
+    </script>
+</body>
+
+</html>

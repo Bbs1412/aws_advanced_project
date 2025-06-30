@@ -337,6 +337,21 @@ def test_translate():
     return render_template("test_translate.html", places=places), 200
 
 
+# ----------------------------------------------------------------------------------------------
+# ChatBot endpoints:
+# ----------------------------------------------------------------------------------------------
+
+# This is just initial setup. Much more with AI can be done here!
+@app.route("/chatBot")
+def chatbot():
+    create_log("App", f"{request.remote_addr} visited the chatbot page.")
+    return render_template("chatbot.html")
+
+
+# ----------------------------------------------------------------------------------------------
+# Testing:
+# ----------------------------------------------------------------------------------------------
+
 # Get all locations in a country with country_code:
 if __name__ == "__main__":
     create_log("App", "Sever Started", pre_lines=1, post_lines=1)
