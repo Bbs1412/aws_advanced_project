@@ -134,6 +134,9 @@ https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-plain.svg
 </table>
 
 
+---
+
+
 # 🚀 Steps to run:
 To run the project locally on your device first, follow these steps:
 
@@ -175,6 +178,9 @@ To run the project locally on your device first, follow these steps:
 1. Now, server is live and project can be accessed at [`http://localhost:5000/`](http://localhost:5000/) in your browser.
 
 1. You can make any changes in the code files and push them to your GitHub repository.
+
+
+---
 
 
 # 🌐 Steps to deploy:
@@ -270,7 +276,86 @@ To run the project locally on your device first, follow these steps:
 - Now the instance can be checked in the **Instances** section in the left sidebar of the EC2 service page.
 
 
+## Set Up RDS Instance:
+- Our project uses a MySQL database to store the destination data.
+- Go to AWS Console > Aurora and RDS > **Databases** (left sidebar) > **Create database** button.
+- These are some recommended settings, but you can change them as per your requirements:
+    1. Database creation method: **Standard Create**.
+    1. Engine type: **MySQL**.
+    1. Templates: **Free tier**.
+    1. Availability & durability: **Single AZ deployment** (1 instance).
+    1. DB instance identifier: `travel-guide-db` (or any name you want).
+    1. Master username: `admin` (or any username you want).
+    1. Master password: Set a strong password and remember it, we will need it later.
+    1. DB instance size: **db.t2.micro** (any free tier eligible).
+    1. Storage: Leave default settings as they are.
+    1. Connectivity:
+        - Virtual Private Cloud (VPC): Default VPC.
+        - Public access: **Yes**.
+        - VPC security groups: **Choose existing** and select the security group you created earlier (`travel-guide-sg`).
+    1. Click on **Create database** button to create the RDS instance.
+- After the database is created, it will take some time to be available.
+- Once the status changes to `Available`, click on the database name to see the details.
+- Note down the **Endpoint** value, we will need it to connect to the database from our Flask application.
+- It will be something like `<name>.<id>.<zone>.rds.amazonaws.com`.
+
+
+## Set Up Translate, Cognito and SNS:
+- Will add this soon...
+
+
+## Deploy the Application:
+Finally, we can deploy the Flask application on the EC2 instance.
+
+1. Connect to the EC2 instance:
+    - AWS Console > EC2 service > **Instances** > Your instance > **Connect**.
+    - Or use ssh to connect from your terminal:
+        ```powershell
+        ssh -i /path/to/your-key.pem ec2-user@<your-ec2-public-ip>
+        ```
+    - Run the following commands:
+        ```bash
+        # Update the package manager
+        sudo yum update -y
+        # Install Python 3 and git
+        sudo yum install python3 git -y
+        ```
+
+1. Clone the project repository:
+    - Run the following command to clone the project repository:
+        ```bash
+        git clone https://github.com/<your-username>/aws_advanced_project.git
+        cd aws_beginner_project
+        ```
+    - If you want to use S3, make sure that updated code files are already pushed to your GitHub repository.
+    
+1. Install the required packages in virtual environment:
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+1. Set up environment variables:
+    - We need to create a `.env` file on the EC2 instance with all the required environment variables.
+    - First make copy of the `.env.example` file:
+        ```bash
+        cp .env.example .env
+        ```
+    - Now, using `nano` or `vim`, open the `.env` file and fill in the required values:
+        ```bash
+        sudo nano .env
+        # Save and exit (in nano: Ctrl+O, Enter, Ctrl+X)
+        ```
+
+1. Run the Flask application:
+    ```bash
+    python app.py &
+    ```
+
+
 ---
+
 
 # ⚠️ Important Instructions:
 - **Free-tier limits:** Make sure to stay within the free-tier limits of AWS services to avoid unexpected charges.
@@ -293,7 +378,9 @@ To run the project locally on your device first, follow these steps:
     - Avoid turning on RDS Backups, or make sure to delete the backups after you are done with the project.
     - Also delete the **RDS Subnet Group** created for the RDS instance, if you created one.
 
+
 ---
+
 
 # 🤝 Contributions:
 
